@@ -5,7 +5,6 @@ import com.blogging_app.exceptions.ResourceNotFoundException;
 import com.blogging_app.payload.UserDto;
 import com.blogging_app.repository.UserRepo;
 import com.blogging_app.services.UserService;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
