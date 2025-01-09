@@ -6,6 +6,8 @@ import lombok.Data;
 @Data
 public class PostDto {
 
+	private int postId;
+
 	private String title;
 
 	private String caption;

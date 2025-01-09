@@ -30,5 +30,12 @@ public class GlobalExceptionHandler {
 		});
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
+	@ExceptionHandler(NullPointerException.class)
+	public ResponseEntity<ApiResponse> handleNullPointerException(NullPointerException ex) {
+//		String error = ex.getMessage();
+		String error = "Service: [ServiceName] - " + ex.getMessage();
+		ApiResponse apiResponse = new ApiResponse(error, false);
+		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 
 }
