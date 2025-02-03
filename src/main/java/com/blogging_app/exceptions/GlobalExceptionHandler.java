@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
 		});
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ApiResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+		String error = ex.getMessage();
+		ApiResponse apiResponse = new ApiResponse(error, false);
+		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+	}
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<ApiResponse> handleNullPointerException(NullPointerException ex) {
 //		String error = ex.getMessage();
