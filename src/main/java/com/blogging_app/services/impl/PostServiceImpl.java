@@ -73,58 +73,30 @@ public class PostServiceImpl implements PostService {
 	public PostResponse getAllPostByUser(Integer userId, Integer pageNo, Integer pageSize, String sortBy) {
 		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-		Page<Post> pagedResult = postRepo.findByUser(user, paging);
-		List<Post> posts = pagedResult.hasContent() ? pagedResult.getContent() : List.of();
-		List<PostDto> postDtos = posts.stream().map((post) -> modelMapper.map(post, PostDto.class)).toList();
-		PostResponse postResponse = new PostResponse();
-		postResponse.setPostDtoList(postDtos);
-		postResponse.setTotalPosts(pagedResult.getTotalElements());
-		postResponse.setTotalPages(pagedResult.getTotalPages());
-		postResponse.setPageNo(pagedResult.getNumber());
-		postResponse.setPageSize(pagedResult.getSize());
-		postResponse.setLast(pagedResult.isLast());
-		return postResponse;
+		return getPostResponse(postRepo.findByUser(user, paging));
 	}
 
 	@Override
 	public PostResponse getAllPostByCategory(Integer categoryID, Integer pageNo, Integer pageSize, String sortBy) {
 		Category category = categoryRepo.findById(categoryID).orElseThrow(() -> new ResourceNotFoundException("Category", categoryID));
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-		Page<Post> pagedResult = postRepo.findByCategory(category, paging);
-		List<Post> posts = pagedResult.hasContent() ? pagedResult.getContent() : List.of();
-		List<PostDto> postDtos = posts.stream().map((post) -> modelMapper.map(post, PostDto.class)).toList();
-		PostResponse postResponse = new PostResponse();
-		postResponse.setPostDtoList(postDtos);
-		postResponse.setTotalPosts(pagedResult.getTotalElements());
-		postResponse.setTotalPages(pagedResult.getTotalPages());
-		postResponse.setPageNo(pagedResult.getNumber());
-		postResponse.setPageSize(pagedResult.getSize());
-		postResponse.setLast(pagedResult.isLast());
-		return postResponse;
+		return getPostResponse(postRepo.findByCategory(category, paging));
 	}
 
 	@Override
 	public PostResponse getAllPosts(Integer pageNo, Integer pageSize, String sortBy) {
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-		Page<Post> pagedResult = postRepo.findAll(paging);
-		List<Post> posts= pagedResult.hasContent() ? pagedResult.getContent() : List.of();
-		List<PostDto> postDtos = posts.stream().map((post) -> modelMapper.map(post, PostDto.class)).toList();
-		PostResponse postResponse = new PostResponse();
-		postResponse.setPostDtoList(postDtos);
-		postResponse.setTotalPosts(pagedResult.getTotalElements());
-		postResponse.setTotalPages(pagedResult.getTotalPages());
-		postResponse.setPageNo(pagedResult.getNumber());
-		postResponse.setPageSize(pagedResult.getSize());
-		postResponse.setLast(pagedResult.isLast());
-		return postResponse;
+		return getPostResponse(postRepo.findAll(paging));
 	}
 
 	@Override
 	public PostResponse searchPost(String keyword, Integer pageNo, Integer pageSize, String sortBy, String sortDir) {
-
 		Sort.Direction direction = Sort.Direction.fromString(sortDir);
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(direction, sortBy));
-		Page<Post> pagedResult = postRepo.findByTitleContaining(keyword, paging);
+		return getPostResponse(postRepo.findByTitleContaining(keyword, paging));
+	}
+
+	private PostResponse getPostResponse(Page<Post> pagedResult) {
 		List<Post> posts = pagedResult.hasContent() ? pagedResult.getContent() : List.of();
 		List<PostDto> postDtos = posts.stream().map((post) -> modelMapper.map(post, PostDto.class)).toList();
 		PostResponse postResponse = new PostResponse();
