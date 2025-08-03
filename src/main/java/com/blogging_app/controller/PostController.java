@@ -4,23 +4,21 @@ import com.blogging_app.config.AppConstants;
 import com.blogging_app.payload.ApiResponse;
 import com.blogging_app.payload.PostDto;
 import com.blogging_app.payload.PostResponse;
-import com.blogging_app.services.CategoryService;
 import com.blogging_app.services.PostService;
-import com.blogging_app.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import java.util.List;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/post")
@@ -29,11 +27,27 @@ public class PostController {
 	@Autowired
 	private PostService postService;
 
+	@Value("${project.image}")
+	private String path;
 
 	@PostMapping("/addpost/{userId}/{categoryId}")
-	ResponseEntity<PostDto> createPost(@Valid @RequestBody PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId) {
-		PostDto postDto1 = postService.createPost(postDto, userId, categoryId);
+	ResponseEntity<PostDto> createPost(@Valid @ModelAttribute PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId, @RequestParam("file") MultipartFile file) throws IOException {
+		PostDto postDto1 = postService.createPost(postDto, userId, categoryId, path, file);
 		return new ResponseEntity<>(postDto1, HttpStatus.CREATED);
+	}
+
+	@GetMapping(value = "/getimage/{filename}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+	public void getImage(@PathVariable String filename, HttpServletResponse response) throws IOException {
+		InputStream inputStream = postService.downloadImage(path, filename);
+		String fileExtension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+		if ("png".equals(fileExtension)) {
+			response.setContentType(MediaType.IMAGE_PNG_VALUE);
+		} else if ("jpeg".equals(fileExtension) || "jpg".equals(fileExtension)) {
+			response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+		} else {
+			response.setContentType("application/octet-stream");
+		}
+		StreamUtils.copy(inputStream, response.getOutputStream());
 	}
 
 	@PutMapping("/updatepost/{postId}")

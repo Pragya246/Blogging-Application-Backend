@@ -1,6 +1,8 @@
 package com.blogging_app.exceptions;
 
 import com.blogging_app.payload.ApiResponse;
+
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,11 @@ public class GlobalExceptionHandler {
 		String error = "Service: [ServiceName] - " + ex.getMessage();
 		ApiResponse apiResponse = new ApiResponse(error, false);
 		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+	@ExceptionHandler(FileNotFoundException.class)
+	public ResponseEntity<ApiResponse> handleFileNotFoundException(FileNotFoundException error) {
+		ApiResponse apiResponse = new ApiResponse(error.getMessage(), false);
+		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.NOT_FOUND);
 	}
 
 }

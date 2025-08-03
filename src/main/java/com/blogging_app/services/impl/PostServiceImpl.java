@@ -10,8 +10,14 @@ import com.blogging_app.repository.CategoryRepo;
 import com.blogging_app.repository.PostRepo;
 import com.blogging_app.repository.UserRepo;
 import com.blogging_app.services.PostService;
-import java.util.Date;
-import java.util.List;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -36,16 +43,34 @@ public class PostServiceImpl implements PostService {
 	ModelMapper modelMapper;
 
 	@Override
-	public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId) {
-		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
-		Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
+	public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId, String path, MultipartFile file) throws IOException {
+//		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+//		Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
+//		Post post = modelMapper.map(postDto, Post.class);
+//		post.setAddedDate(new Date());
+//		post.setImgName(uploadImage(file, path));
+//		post.setUser(user);
+//		post.setCategory(category);
+//		Post newPost = postRepo.save(post);
+//		return this.modelMapper.map(newPost, PostDto.class);
 		Post post = modelMapper.map(postDto, Post.class);
-		post.setAddedDate(new Date());
-		post.setImgName("default.jpg");
-		post.setUser(user);
-		post.setCategory(category);
-		Post newPost = postRepo.save(post);
-		return this.modelMapper.map(newPost, PostDto.class);
+		String filePath=path+file.getOriginalFilename();
+		File directory = new File(path);
+		if (!directory.exists()) {
+			directory.mkdirs();
+		}
+		Post savedPost = postRepo.save(post.builder()
+				.title(postDto.getTitle())
+				.caption(postDto.getCaption())
+				.addedDate(new Date())
+				.imgName(file.getOriginalFilename())
+				.user(userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId)))
+				.category(categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId)))
+				.build());
+		System.out.println(path);
+		Files.copy(file.getInputStream(), Paths.get(filePath));
+//		file.transferTo(new File(filePath));
+		return modelMapper.map(savedPost, PostDto.class);
 	}
 
 	@Override
@@ -94,6 +119,27 @@ public class PostServiceImpl implements PostService {
 		Sort.Direction direction = Sort.Direction.fromString(sortDir);
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(direction, sortBy));
 		return getPostResponse(postRepo.findByTitleContaining(keyword, paging));
+	}
+
+	@Override
+	public InputStream downloadImage(String path, String fileName) throws IOException {
+//		String filepath = path + File.separator + filename;
+//        return Files.newInputStream(Paths.get(filepath));
+		String filePath=path+fileName;
+		return Files.newInputStream(new File(filePath).toPath());
+//        return Files.readAllBytes(new File(filePath).toPath());
+	}
+
+	private String uploadImage(MultipartFile file, String path) throws IOException {
+		// upload image logic
+		String name = file.getOriginalFilename();
+		String filename = UUID.randomUUID().toString().concat(String.valueOf(name.lastIndexOf(".")));
+		File file1 = new File(path);
+		if(!file1.exists())
+			file1.mkdirs();
+		String filePath = path +File.separator+ filename;
+		Files.copy(file.getInputStream(), Paths.get(filePath));
+		return name;
 	}
 
 	private PostResponse getPostResponse(Page<Post> pagedResult) {
