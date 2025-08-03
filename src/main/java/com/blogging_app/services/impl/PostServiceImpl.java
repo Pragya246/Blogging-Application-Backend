@@ -44,15 +44,6 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId, String path, MultipartFile file) throws IOException {
-//		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
-//		Category category = categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
-//		Post post = modelMapper.map(postDto, Post.class);
-//		post.setAddedDate(new Date());
-//		post.setImgName(uploadImage(file, path));
-//		post.setUser(user);
-//		post.setCategory(category);
-//		Post newPost = postRepo.save(post);
-//		return this.modelMapper.map(newPost, PostDto.class);
 		Post post = modelMapper.map(postDto, Post.class);
 		String filePath=path+file.getOriginalFilename();
 		File directory = new File(path);
@@ -69,7 +60,6 @@ public class PostServiceImpl implements PostService {
 				.build());
 		System.out.println(path);
 		Files.copy(file.getInputStream(), Paths.get(filePath));
-//		file.transferTo(new File(filePath));
 		return modelMapper.map(savedPost, PostDto.class);
 	}
 
@@ -123,11 +113,8 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public InputStream downloadImage(String path, String fileName) throws IOException {
-//		String filepath = path + File.separator + filename;
-//        return Files.newInputStream(Paths.get(filepath));
 		String filePath=path+fileName;
 		return Files.newInputStream(new File(filePath).toPath());
-//        return Files.readAllBytes(new File(filePath).toPath());
 	}
 
 	private String uploadImage(MultipartFile file, String path) throws IOException {
