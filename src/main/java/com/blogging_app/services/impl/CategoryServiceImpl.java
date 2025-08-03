@@ -27,7 +27,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryDto updateCategory(CategoryDto categoryDto, Integer id) {
-		Category category = categoryRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("Category not found with id: ", id));
+		Category category = categoryRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("Category", id));
 		category.setCategoryTitle(categoryDto.getCategoryTitle());
 		category.setCategoryDescription(categoryDto.getCategoryDescription());
 		Category savedCategory = categoryRepo.save(category);
@@ -44,13 +44,13 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public CategoryDto getCategoryById(int id) {
-		Category category = categoryRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("Category not found with id: ", id));
+		Category category = categoryRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("Category", id));
 		return modelMapper.map(category, CategoryDto.class);
 	}
 
 	@Override
 	public void deleteCategoryById(int id) {
-		Category category = categoryRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("Category not found with id: ", id));
+		Category category = categoryRepo.findById(id).orElseThrow(()->new ResourceNotFoundException("Category", id));
 		categoryRepo.delete(category);
 	}
 }
