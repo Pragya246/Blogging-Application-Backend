@@ -45,21 +45,21 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId, String path, MultipartFile file) throws IOException {
 		Post post = modelMapper.map(postDto, Post.class);
-		String filePath=path+file.getOriginalFilename();
 		File directory = new File(path);
 		if (!directory.exists()) {
 			directory.mkdirs();
 		}
+		String encFilePath = path+UUID.randomUUID().toString().concat(String.valueOf(file.getOriginalFilename()));
 		Post savedPost = postRepo.save(post.builder()
 				.title(postDto.getTitle())
 				.caption(postDto.getCaption())
 				.addedDate(new Date())
-				.imgName(file.getOriginalFilename())
+				.imgName(encFilePath)
 				.user(userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId)))
 				.category(categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId)))
 				.build());
 		System.out.println(path);
-		Files.copy(file.getInputStream(), Paths.get(filePath));
+		Files.copy(file.getInputStream(), Paths.get(encFilePath));
 		return modelMapper.map(savedPost, PostDto.class);
 	}
 
