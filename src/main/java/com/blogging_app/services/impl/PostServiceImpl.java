@@ -55,8 +55,8 @@ public class PostServiceImpl implements PostService {
 				.caption(postDto.getCaption())
 				.addedDate(new Date())
 				.imgName(file.getOriginalFilename())
-				.user(userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId)))
-				.category(categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", categoryId)))
+				.user(userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", Integer.toString(userId))))
+				.category(categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", Integer.toString(categoryId))))
 				.build());
 		System.out.println(path);
 		Files.copy(file.getInputStream(), Paths.get(filePath));
@@ -65,7 +65,7 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public PostDto updatePost(PostDto postDto, Integer postId) {
-		Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", postId));
+		Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", Integer.toString(postId)));
 		post.setTitle(postDto.getTitle());
 		post.setCaption(postDto.getCaption());
 		Post savedPost = postRepo.save(post);
@@ -74,26 +74,26 @@ public class PostServiceImpl implements PostService {
 
 	@Override
 	public void deletePost(Integer postId) {
-		Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", postId));
+		Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", Integer.toString(postId)));
 		postRepo.delete(post);
 	}
 
 	@Override
 	public PostDto getpostById(Integer postId) {
-		Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", postId));
+		Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", Integer.toString(postId)));
 		return modelMapper.map(post, PostDto.class);
 	}
 
 	@Override
 	public PostResponse getAllPostByUser(Integer userId, Integer pageNo, Integer pageSize, String sortBy) {
-		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", Integer.toString(userId)));
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 		return getPostResponse(postRepo.findByUser(user, paging));
 	}
 
 	@Override
 	public PostResponse getAllPostByCategory(Integer categoryID, Integer pageNo, Integer pageSize, String sortBy) {
-		Category category = categoryRepo.findById(categoryID).orElseThrow(() -> new ResourceNotFoundException("Category", categoryID));
+		Category category = categoryRepo.findById(categoryID).orElseThrow(() -> new ResourceNotFoundException("Category", Integer.toString(categoryID)));
 		Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
 		return getPostResponse(postRepo.findByCategory(category, paging));
 	}

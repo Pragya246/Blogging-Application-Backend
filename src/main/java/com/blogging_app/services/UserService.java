@@ -9,5 +9,5 @@ public interface UserService {
 	void deleteUser(Integer userId);
 	UserDto getUserById(Integer userId);
 	List<UserDto> getAllUsers();
-
+    String isValidUser(UserDto userDto);
 }

@@ -3,6 +3,7 @@ package com.blogging_app.exceptions;
 import com.blogging_app.payload.ApiResponse;
 
 import java.io.FileNotFoundException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,5 +51,12 @@ public class GlobalExceptionHandler {
 		ApiResponse apiResponse = new ApiResponse(error.getMessage(), false);
 		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.NOT_FOUND);
 	}
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ResponseEntity<ApiResponse> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
+        String errorMsg = ex.getMessage().substring(0, 29);
+        ApiResponse apiResponse = new ApiResponse(errorMsg, false);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+    }
 
 }
