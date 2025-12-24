@@ -3,32 +3,38 @@ package com.blogging_app.controller;
 import com.blogging_app.payload.ApiResponse;
 import com.blogging_app.payload.UserDto;
 import com.blogging_app.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/user")
 public class UserController {
 
 	@Autowired
 	private UserService userService;
 
+    @GetMapping("/get/csrf")
+    public CsrfToken getCsrf(HttpServletRequest request) {
+        return (CsrfToken) request.getAttribute("_csrf");
+    }
+
 	@PostMapping("/add/user")
 	ResponseEntity<UserDto> addUser(@Valid @RequestBody UserDto userDto) {
 		UserDto userDto1 = userService.createUser(userDto);
 		return ResponseEntity.ok(userDto1);
 	}
+
+    @PostMapping("/login")
+    String userLogin(@RequestBody UserDto userDto) {
+        return userService.isValidUser(userDto);
+    }
 
 	@PutMapping("/updatuser/{userId}")
 	ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable int userId) {
